@@ -86,4 +86,37 @@ class HomeViewModelTest {
             cancelAndIgnoreRemainingEvents()
         }
     }
+
+    @Test fun pocketIsEmptyOnSetupDay() = runTest {
+        ready.test {
+            val first = awaitItem()
+            assertEquals(0L, first.pocket.amountPaise)
+            assertEquals(null, first.celebration)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test fun yesterdaysLeftoverDropsIntoThePocketOnce() = runTest {
+        container.expenseRepository.add(50_000, null, "", time.now()) // ₹500 of ₹800 on Nov 1
+        today.value = LocalDate.of(2026, 11, 2)
+        ready.test {
+            val nextDay = awaitMatching { it.allowance.day == LocalDate.of(2026, 11, 2) && it.celebration != null }
+            assertEquals(30_000L, nextDay.pocket.amountPaise)
+            assertEquals(PocketCelebration(LocalDate.of(2026, 11, 1), 30_000), nextDay.celebration)
+
+            vm.markCelebrated(nextDay.celebration!!)
+            assertEquals(30_000L, awaitMatching { it.celebration == null }.pocket.amountPaise)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    @Test fun severalUnseenDaysCelebrateAsOne() = runTest {
+        today.value = LocalDate.of(2026, 11, 3) // Nov 1 and 2 untouched: +₹800 and +₹827
+        ready.test {
+            val c = awaitMatching { it.allowance.day == LocalDate.of(2026, 11, 3) && it.celebration != null }.celebration!!
+            assertEquals(LocalDate.of(2026, 11, 2), c.throughDay)
+            assertEquals(80_000L + 82_758L, c.deltaPaise)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
 }

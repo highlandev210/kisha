@@ -5,6 +5,8 @@ import androidx.lifecycle.viewModelScope
 import com.example.kisha.allowance.AllowanceEngine
 import com.example.kisha.allowance.DateRange
 import com.example.kisha.allowance.DayAllowance
+import com.example.kisha.allowance.Pocket
+import com.example.kisha.allowance.PocketEngine
 import com.example.kisha.allowance.localDateIn
 import com.example.kisha.data.BudgetRepository
 import com.example.kisha.data.ExpenseRepository
@@ -26,6 +28,9 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.temporal.ChronoUnit
 
+/** Finished days the user hasn't watched drop into the pocket yet, played as one coin. */
+data class PocketCelebration(val throughDay: LocalDate, val deltaPaise: Long)
+
 sealed interface HomeUiState {
     data object Loading : HomeUiState
 
@@ -35,6 +40,9 @@ sealed interface HomeUiState {
         /** Share of the period elapsed, including today: 1/30 on day 1 of a 30-day period. */
         val elapsedFraction: Float,
         val todayExpenses: List<ExpenseRow>,
+        val pocket: Pocket,
+        /** Non-null once per new finished day (or run of days) until [HomeViewModel.markCelebrated]. */
+        val celebration: PocketCelebration?,
     ) : HomeUiState
 }
 
@@ -55,14 +63,17 @@ class HomeViewModel(
                         expenses.observeForPeriod(current.id),
                         budget.observeIncome(current.id),
                         expenses.categories,
-                    ) { period, periodExpenses, incomes, categories ->
+                        budget.config.filterNotNull(),
+                    ) { period, periodExpenses, incomes, categories, config ->
                         val zone = time.zone()
-                        val allowance = AllowanceEngine.dayAllowance(
-                            period.toBudget(),
-                            periodExpenses.filter { it.affectsAllowance }.map { it.toEntry(zone) },
-                            incomes.map { it.toEntry(zone) },
-                            day,
+                        val budgetSnapshot = period.toBudget()
+                        val entries = periodExpenses.filter { it.affectsAllowance }.map { it.toEntry(zone) }
+                        val incomeEntries = incomes.map { it.toEntry(zone) }
+                        val allowance = AllowanceEngine.dayAllowance(budgetSnapshot, entries, incomeEntries, day)
+                        val pocket = PocketEngine.pocket(
+                            budgetSnapshot, entries, incomeEntries, day, countFrom = config.setupDate ?: period.startDate,
                         )
+                        val unseen = pocket.days.filter { config.pocketShownThrough == null || it.day.isAfter(config.pocketShownThrough) }
                         val byId = categories.associateBy { it.id }
                         val range = period.range()
                         HomeUiState.Ready(
@@ -71,8 +82,11 @@ class HomeViewModel(
                             elapsedFraction = (ChronoUnit.DAYS.between(range.start, allowance.day) + 1).toFloat() /
                                 range.lengthInDays,
                             todayExpenses = periodExpenses
-                                .filter { it.occurredAt.localDateIn(zone) == allowance.day }
+                                .filter { range.clamp(it.occurredAt.localDateIn(zone)) == allowance.day }
                                 .map { ExpenseRow(it, it.categoryId?.let(byId::get)) },
+                            pocket = pocket,
+                            celebration = unseen.takeIf { it.isNotEmpty() }
+                                ?.let { PocketCelebration(it.last().day, it.sumOf { d -> d.deltaPaise }) },
                         )
                     }
                 }
@@ -86,5 +100,10 @@ class HomeViewModel(
     /** Undo for [delete]. Takes the expense itself so each snackbar restores the row it announced. */
     fun restore(expense: ExpenseEntity) {
         viewModelScope.launch { expenses.restore(expense) }
+    }
+
+    /** Called when the coin animation for [celebration] has played (or was skipped). */
+    fun markCelebrated(celebration: PocketCelebration) {
+        viewModelScope.launch { budget.markPocketShown(celebration.throughDay) }
     }
 }
