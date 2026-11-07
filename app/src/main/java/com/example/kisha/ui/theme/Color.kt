@@ -90,12 +90,16 @@ internal val KishaLightExtras = KishaColors(
     over = StatusColors(Color(0xFFBA1A1A), Color(0xFFFFFFFF), Color(0xFFFFDAD6), Color(0xFF410002)),
     coin = Color(0xFFFFD27A),
     onCoin = Color(0xFF3D2A00),
+    fab = Color(0xFFFFDBC8),
+    onFab = Color(0xFF331200),
 )
 
 internal val KishaDarkExtras = KishaColors(
-    onTrack = StatusColors(Color(0xFF005048), Color(0xFF74F8E5), Color(0xFF6E3810), Color(0xFFFFDBC8)),
+    onTrack = StatusColors(Color(0xFF005048), Color(0xFF74F8E5), Color(0xFFFFDBC8), Color(0xFF331200)),
     low = StatusColors(Color(0xFF6E3810), Color(0xFFFFDBC8), Color(0xFFFFDBC8), Color(0xFF331200)),
     over = StatusColors(Color(0xFF93000A), Color(0xFFFFDAD6), Color(0xFFFFDAD6), Color(0xFF410002)),
     coin = Color(0xFFFFD27A),
     onCoin = Color(0xFF3D2A00),
+    fab = Color(0xFFFFB68A),
+    onFab = Color(0xFF331200),
 )

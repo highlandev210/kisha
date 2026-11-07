@@ -42,7 +42,12 @@ class HomeScreenTest {
     @Test fun showsAllowanceAndPeriodSummary() {
         compose.onNodeWithTag(TestTags.ALLOWANCE).assertTextEquals("₹800")
         compose.onNodeWithText("₹24,000", substring = true).assertExists()
-        compose.onNodeWithText(res.getQuantityString(R.plurals.home_days_left, 30, 30)).assertExists()
+        compose.onNodeWithText(res.getQuantityString(R.plurals.home_days_to_go, 30)).assertExists()
         compose.onNodeWithText(res.getString(R.string.status_on_track)).assertExists()
+    }
+
+    @Test fun showsAnEmptyPocketOnSetupDay() {
+        compose.onNodeWithText(res.getString(R.string.home_pocket_label)).assertExists()
+        compose.onNodeWithText(res.getString(R.string.home_pocket_start)).assertExists()
     }
 }

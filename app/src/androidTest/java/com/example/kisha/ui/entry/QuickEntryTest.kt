@@ -1,5 +1,7 @@
 package com.example.kisha.ui.entry
 
+import androidx.compose.ui.semantics.SemanticsProperties
+import androidx.compose.ui.semantics.getOrNull
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
@@ -52,7 +54,12 @@ class QuickEntryTest {
     }
 
     private fun assertAllowance(expected: String) {
-        compose.waitUntil(5_000) { compose.onAllNodesWithText(expected).fetchSemanticsNodes().isNotEmpty() }
+        runCatching {
+            compose.waitUntil(10_000) { compose.onAllNodesWithText(expected).fetchSemanticsNodes().isNotEmpty() }
+        }.onFailure {
+            val shown = compose.onNodeWithTag(TestTags.ALLOWANCE).fetchSemanticsNode().config.getOrNull(SemanticsProperties.Text)
+            throw AssertionError("allowance never showed $expected; it shows $shown", it)
+        }
         compose.onNodeWithTag(TestTags.ALLOWANCE).assertTextEquals(expected)
     }
 

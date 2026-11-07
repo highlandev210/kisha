@@ -3,13 +3,14 @@ package com.example.kisha.ui.common
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.ListItemDefaults
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -36,17 +37,22 @@ fun ExpenseListItem(row: ExpenseRow, onClick: () -> Unit, modifier: Modifier = M
         modifier = modifier.clickable(onClick = onClick),
         colors = ListItemDefaults.colors(containerColor = Color.Transparent),
         leadingContent = {
-            Surface(shape = CircleShape, color = MaterialTheme.colorScheme.secondaryContainer) {
+            // Expressive shape library instead of a plain circle.
+            Surface(
+                shape = MaterialShapes.Cookie9Sided.toShape(),
+                color = MaterialTheme.colorScheme.tertiaryContainer,
+                contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+            ) {
                 Icon(
                     categoryIcon(row.category?.icon),
                     contentDescription = null,
-                    modifier = Modifier.padding(8.dp).size(24.dp),
+                    modifier = Modifier.padding(10.dp).size(24.dp),
                 )
             }
         },
         supportingContent = { Text(listOfNotNull(note, time).joinToString(" · ")) },
         trailingContent = {
-            Text(formatter.format(row.expense.amountPaise), style = MaterialTheme.typography.titleMedium)
+            Text(formatter.format(row.expense.amountPaise), style = MaterialTheme.typography.titleMediumEmphasized)
         },
     ) {
         Text(row.category?.name ?: stringResource(R.string.expense_no_category))

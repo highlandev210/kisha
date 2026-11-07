@@ -1,7 +1,10 @@
 package com.example.kisha.ui.main
 
+import android.app.Activity
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
@@ -20,6 +23,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -28,9 +32,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.core.view.WindowCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kisha.AppContainer
 import com.example.kisha.R
@@ -43,6 +49,7 @@ import com.example.kisha.ui.home.HomeScreen
 import com.example.kisha.ui.home.HomeViewModel
 import com.example.kisha.ui.settings.SettingsScreen
 import com.example.kisha.ui.settings.SettingsViewModel
+import com.example.kisha.ui.theme.KishaTheme
 
 enum class Tab(val label: Int, val icon: ImageVector) {
     TODAY(R.string.tab_today, Icons.Outlined.Today),
@@ -68,6 +75,17 @@ fun MainScaffold(container: AppContainer) {
     }
     val openExpense: (Long) -> Unit = { entryViewModel.open(EntryTarget.EditExpense(it)) }
 
+    // Home's header is a deep colour in both themes, so its status-bar icons are always light.
+    val view = LocalView.current
+    val darkTheme = isSystemInDarkTheme()
+    DisposableEffect(tab, darkTheme) {
+        val window = (view.context as? Activity)?.window
+        val controller = window?.let { WindowCompat.getInsetsController(it, view) }
+        val previous = controller?.isAppearanceLightStatusBars
+        controller?.isAppearanceLightStatusBars = !darkTheme && tab != Tab.TODAY
+        onDispose { if (controller != null && previous != null) controller.isAppearanceLightStatusBars = previous }
+    }
+
     Row(Modifier.fillMaxSize()) {
         if (wide) {
             NavigationRail {
@@ -84,6 +102,8 @@ fun MainScaffold(container: AppContainer) {
         }
         Scaffold(
             modifier = Modifier.weight(1f),
+            // Screens handle the status bar themselves so Home's header can run edge to edge.
+            contentWindowInsets = WindowInsets(0, 0, 0, 0),
             bottomBar = {
                 if (!wide) {
                     ShortNavigationBar {
@@ -108,6 +128,9 @@ fun MainScaffold(container: AppContainer) {
                         icon = { Icon(Icons.Filled.Add, contentDescription = null) },
                         onClick = { entryViewModel.open(EntryTarget.NewExpense) },
                         modifier = Modifier.semantics { contentDescription = addLabel },
+                        // Warm peach against the teal header (DP-1: strong container colour).
+                        containerColor = KishaTheme.colors.fab,
+                        contentColor = KishaTheme.colors.onFab,
                     )
                 }
             },

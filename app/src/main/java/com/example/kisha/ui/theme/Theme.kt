@@ -28,6 +28,9 @@ data class KishaColors(
     /** The pocket coin. */
     val coin: Color,
     val onCoin: Color,
+    /** The Add button: warm peach that pops against the teal header in both themes. */
+    val fab: Color,
+    val onFab: Color,
 ) {
     fun status(status: AllowanceStatus): StatusColors = when (status) {
         AllowanceStatus.ON_TRACK -> onTrack
