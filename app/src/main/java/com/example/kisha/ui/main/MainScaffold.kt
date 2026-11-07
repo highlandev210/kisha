@@ -29,9 +29,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kisha.AppContainer
 import com.example.kisha.R
+import com.example.kisha.ui.entry.EntryTarget
+import com.example.kisha.ui.entry.EntryViewModel
+import com.example.kisha.ui.entry.QuickEntrySheet
 import com.example.kisha.ui.home.HomeScreen
 import com.example.kisha.ui.home.HomeViewModel
 
@@ -50,6 +55,10 @@ fun MainScaffold(container: AppContainer) {
     val homeViewModel = viewModel {
         HomeViewModel(container.budgetRepository, container.expenseRepository, container.today, container.time)
     }
+    val entryViewModel = viewModel {
+        EntryViewModel(container.expenseRepository, container.budgetRepository, container.time)
+    }
+    val openExpense: (Long) -> Unit = { entryViewModel.open(EntryTarget.EditExpense(it)) }
 
     Row(Modifier.fillMaxSize()) {
         if (wide) {
@@ -83,11 +92,14 @@ fun MainScaffold(container: AppContainer) {
             },
             floatingActionButton = {
                 if (tab == Tab.TODAY) {
-                    // Decision 1: one tap opens expense entry (HM-5); wired to the sheet in Task 10.
+                    // Decision 1: one tap opens expense entry (HM-5); income is a toggle inside the sheet.
+                    // The FAB clears its label's semantics, so name it explicitly for TalkBack (NF-6).
+                    val addLabel = stringResource(R.string.add)
                     MediumExtendedFloatingActionButton(
-                        text = { Text(stringResource(R.string.add)) },
+                        text = { Text(addLabel) },
                         icon = { Icon(Icons.Filled.Add, contentDescription = null) },
-                        onClick = {},
+                        onClick = { entryViewModel.open(EntryTarget.NewExpense) },
+                        modifier = Modifier.semantics { contentDescription = addLabel },
                     )
                 }
             },
@@ -95,11 +107,12 @@ fun MainScaffold(container: AppContainer) {
         ) { padding ->
             Box(Modifier.padding(padding)) {
                 when (tab) {
-                    Tab.TODAY -> HomeScreen(homeViewModel, onExpenseClick = {}, snackbarHostState = snackbarHostState)
+                    Tab.TODAY -> HomeScreen(homeViewModel, onExpenseClick = openExpense, snackbarHostState = snackbarHostState)
                     Tab.HISTORY -> Text(stringResource(R.string.tab_history))
                     Tab.SETTINGS -> Text(stringResource(R.string.tab_settings))
                 }
             }
         }
     }
+    QuickEntrySheet(entryViewModel)
 }

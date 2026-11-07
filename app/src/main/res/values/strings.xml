@@ -69,4 +69,17 @@
     <string name="delete">Delete</string>
     <string name="add">Add</string>
     <string name="expense_no_category">No category</string>
+
+    <!-- Quick entry -->
+    <string name="entry_mode_expense">Expense</string>
+    <string name="entry_mode_income">Income</string>
+    <string name="entry_note_label">Note (optional)</string>
+    <string name="entry_save">Save</string>
+    <string name="entry_delete">Delete expense</string>
+    <string name="entry_today_at">Today, %1$s</string>
+    <string name="entry_date_time">Date and time</string>
+    <string name="keypad_backspace">Delete digit</string>
+    <string name="keypad_dot">Decimal point</string>
+    <string name="dialog_ok">OK</string>
+    <string name="dialog_cancel">Cancel</string>
 </resources>
