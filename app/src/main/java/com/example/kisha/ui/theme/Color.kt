@@ -2,10 +2,19 @@ package com.example.kisha.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple80 = Color(0xFFD0BCFF)
-val PurpleGrey80 = Color(0xFFCCC2DC)
-val Pink80 = Color(0xFFEFB8C8)
+// Kisha fallback scheme (Android 10–11, where dynamic colour is unavailable). Screens never use these
+// directly; they read MaterialTheme.colorScheme roles.
 
-val Purple40 = Color(0xFF6650a4)
-val PurpleGrey40 = Color(0xFF625b71)
-val Pink40 = Color(0xFF7D5260)
+internal val LightPrimary = Color(0xFF006B5F)
+internal val LightOnPrimary = Color(0xFFFFFFFF)
+internal val LightPrimaryContainer = Color(0xFF9EF2E2)
+internal val LightOnPrimaryContainer = Color(0xFF00201C)
+internal val LightSecondary = Color(0xFF4A635F)
+internal val LightTertiary = Color(0xFF456179)
+
+internal val DarkPrimary = Color(0xFF82D5C6)
+internal val DarkOnPrimary = Color(0xFF003731)
+internal val DarkPrimaryContainer = Color(0xFF005048)
+internal val DarkOnPrimaryContainer = Color(0xFF9EF2E2)
+internal val DarkSecondary = Color(0xFFB1CCC6)
+internal val DarkTertiary = Color(0xFFADCAE6)
