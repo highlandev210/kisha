@@ -7,6 +7,7 @@ import com.example.kisha.data.BudgetRepository
 import com.example.kisha.data.ExpenseRepository
 import com.example.kisha.data.TimeSource
 import com.example.kisha.data.db.CategoryEntity
+import com.example.kisha.data.db.ExpenseEntity
 import com.example.kisha.data.today
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -37,6 +38,8 @@ data class EntryUiState(
     val categories: List<CategoryEntity> = emptyList(),
     /** EX-2 date picker bounds: first period start → today. */
     val selectableDates: DateRange? = null,
+    /** True once the user picked a date/time; until then a new expense is stamped when saved. */
+    val dateTouched: Boolean = false,
 )
 
 class EntryViewModel(
@@ -86,7 +89,7 @@ class EntryViewModel(
     fun setNote(note: String) = _state.update { it.copy(note = note) }
 
     fun setDateTime(date: LocalDate, time: LocalTime) = _state.update {
-        it.copy(occurredAt = date.atTime(time).atZone(it.zone).toInstant())
+        it.copy(occurredAt = date.atTime(time).atZone(it.zone).toInstant(), dateTouched = true)
     }
 
     fun save() {
@@ -103,14 +106,26 @@ class EntryViewModel(
                         it.copy(amountPaise = s.amount.paise, categoryId = s.categoryId, note = note, occurredAt = s.occurredAt),
                     )
                 }
-                else -> expenses.add(s.amount.paise, s.categoryId, note, s.occurredAt)
+                // A sheet left open across midnight saves to when Save was tapped, unless a time was picked.
+                else -> expenses.add(s.amount.paise, s.categoryId, note, if (s.dateTouched) s.occurredAt else time.now())
             }
         }
     }
 
-    fun deleteEditing() {
+    /** Deletes the expense being edited and hands it to [onDeleted] so the caller can offer Undo. */
+    fun deleteEditing(onDeleted: (ExpenseEntity) -> Unit = {}) {
         val target = _state.value.target as? EntryTarget.EditExpense ?: return
         close()
-        viewModelScope.launch { expenses.get(target.id)?.let { expenses.delete(it) } }
+        viewModelScope.launch {
+            expenses.get(target.id)?.let {
+                expenses.delete(it)
+                onDeleted(it)
+            }
+        }
+    }
+
+    /** Undo for [deleteEditing]. */
+    fun restore(expense: ExpenseEntity) {
+        viewModelScope.launch { expenses.restore(expense) }
     }
 }

@@ -1,7 +1,9 @@
 package com.example.kisha.ui.onboarding
 
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -10,7 +12,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
@@ -22,15 +26,19 @@ import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.ListItem
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
@@ -48,6 +56,7 @@ import com.example.kisha.data.db.PeriodType
 import com.example.kisha.ui.TestTags
 import com.example.kisha.ui.common.ConnectedChoice
 import com.example.kisha.ui.format.LocalMoneyFormatter
+import com.example.kisha.ui.theme.KishaTheme
 
 @Composable
 fun OnboardingScreen(container: AppContainer) {
@@ -247,24 +256,38 @@ private fun FixedCostForm(state: OnboardingState, viewModel: OnboardingViewModel
 private fun PreviewStep(state: OnboardingState) {
     val preview = state.preview ?: return
     val formatter = LocalMoneyFormatter.current
+    // A first taste of Home's hero: status colour, the giant number, the burst.
+    val status = KishaTheme.colors.status(preview.status)
     StepHeader(R.string.onboarding_preview_title)
     Surface(
-        color = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
-        shape = MaterialTheme.shapes.extraLarge,
+        color = status.container,
+        contentColor = status.content,
+        shape = MaterialTheme.shapes.extraLargeIncreased.copy(bottomStart = MaterialTheme.shapes.small.bottomStart),
         modifier = Modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
-            Text(stringResource(R.string.onboarding_preview_label), style = MaterialTheme.typography.titleMedium)
-            Text(
-                formatter.formatWhole(preview.remainingPaise),
-                style = MaterialTheme.typography.displayLargeEmphasized,
-                modifier = Modifier.testTag(TestTags.PREVIEW_ALLOWANCE),
+        Box {
+            Box(
+                Modifier
+                    .align(Alignment.TopEnd)
+                    .offset(x = 70.dp, y = (-40).dp)
+                    .size(200.dp)
+                    .clip(MaterialShapes.Sunny.toShape())
+                    .background(status.content.copy(alpha = 0.13f)),
             )
-            Text(
-                pluralStringResource(R.plurals.onboarding_preview_days, preview.daysLeft, preview.daysLeft),
-                style = MaterialTheme.typography.bodyLarge,
-            )
+            Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                Text(stringResource(R.string.onboarding_preview_label), style = MaterialTheme.typography.titleMedium)
+                Text(
+                    formatter.formatWhole(preview.remainingPaise),
+                    style = KishaTheme.heroNumber,
+                    maxLines = 1,
+                    autoSize = KishaTheme.heroAutoSize,
+                    modifier = Modifier.testTag(TestTags.PREVIEW_ALLOWANCE),
+                )
+                Text(
+                    pluralStringResource(R.plurals.onboarding_preview_days, preview.daysLeft, preview.daysLeft),
+                    style = MaterialTheme.typography.bodyLarge,
+                )
+            }
         }
     }
 }
