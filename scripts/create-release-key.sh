@@ -28,8 +28,11 @@ else
   echo "Created $KEYSTORE (password in $SECRETS)."
 fi
 
+# Plain KEY=value lines; `set -a` exports them (works with macOS's bash 3.2, unlike `source <(...)`).
+set -a
 # shellcheck disable=SC1090
-source <(sed 's/^/export /' "$SECRETS")
+. "$SECRETS"
+set +a
 echo "Signing certificate fingerprint (publish this so people can verify downloads):"
 "$KEYTOOL" -list -v -keystore "$KEYSTORE" -storepass "$KISHA_KEYSTORE_PASSWORD" | grep -E "SHA256:" | head -1
 

@@ -48,6 +48,13 @@ Kisha (കീശ, Malayalam for *pocket*) turns your monthly budget into one num
 
 Get the APK from [**Releases**](https://github.com/highlandev210/kisha/releases/latest) and install it (Android 10 or newer). Each release has a `.sha256` checksum next to the APK.
 
+Releases are signed with this certificate. Check it with `apksigner verify --print-certs kisha-*.apk`, or let [AppVerifier](https://github.com/soupslurpr/AppVerifier) compare it:
+
+```
+io.github.highlandev210.kisha
+28:BA:F0:64:3A:00:78:15:16:CF:AB:5B:A9:A8:CE:31:98:3A:34:35:26:D9:83:15:CC:4B:60:73:CD:0D:E3:56
+```
+
 To get updates automatically, add this repository to [Obtainium](https://github.com/ImranR98/Obtainium).
 
 ## Build from source
