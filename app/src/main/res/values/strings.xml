@@ -87,4 +87,20 @@
     <string name="history_spent_of">%1$s of %2$s</string>
     <string name="history_previous">Previous period</string>
     <string name="history_next">Next period</string>
+
+    <!-- Settings -->
+    <string name="settings_income_title">Income this period</string>
+    <string name="settings_income_label">Base income</string>
+    <string name="settings_save">Save</string>
+    <string name="settings_extra_income">Extra income</string>
+    <string name="settings_no_extra_income">No extra income this period.</string>
+    <string name="settings_delete_named">Delete %1$s</string>
+    <string name="settings_fixed_title">Fixed costs</string>
+    <string name="settings_fixed_add">Add fixed cost</string>
+    <string name="settings_fixed_edit">Edit fixed cost</string>
+    <string name="settings_fixed_empty">No fixed costs yet.</string>
+    <string name="settings_currency_title">Currency</string>
+    <string name="settings_currency_symbol">Symbol</string>
+    <string name="grouping_indian">1,00,000</string>
+    <string name="grouping_international">100,000</string>
 </resources>

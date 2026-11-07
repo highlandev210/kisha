@@ -41,6 +41,8 @@ import com.example.kisha.ui.history.HistoryScreen
 import com.example.kisha.ui.history.HistoryViewModel
 import com.example.kisha.ui.home.HomeScreen
 import com.example.kisha.ui.home.HomeViewModel
+import com.example.kisha.ui.settings.SettingsScreen
+import com.example.kisha.ui.settings.SettingsViewModel
 
 enum class Tab(val label: Int, val icon: ImageVector) {
     TODAY(R.string.tab_today, Icons.Outlined.Today),
@@ -60,6 +62,7 @@ fun MainScaffold(container: AppContainer) {
     val historyViewModel = viewModel {
         HistoryViewModel(container.budgetRepository, container.expenseRepository, container.today, container.time)
     }
+    val settingsViewModel = viewModel { SettingsViewModel(container.budgetRepository, container.today) }
     val entryViewModel = viewModel {
         EntryViewModel(container.expenseRepository, container.budgetRepository, container.time)
     }
@@ -114,7 +117,7 @@ fun MainScaffold(container: AppContainer) {
                 when (tab) {
                     Tab.TODAY -> HomeScreen(homeViewModel, onExpenseClick = openExpense, snackbarHostState = snackbarHostState)
                     Tab.HISTORY -> HistoryScreen(historyViewModel, onExpenseClick = openExpense)
-                    Tab.SETTINGS -> Text(stringResource(R.string.tab_settings))
+                    Tab.SETTINGS -> SettingsScreen(settingsViewModel)
                 }
             }
         }
