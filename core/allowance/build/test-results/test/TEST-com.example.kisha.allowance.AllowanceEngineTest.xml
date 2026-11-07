@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<testsuite name="com.example.kisha.allowance.AllowanceEngineTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-11-07T12:44:03.727Z" hostname="MacBook-Air.local" time="0.016">
+<testsuite name="com.example.kisha.allowance.AllowanceEngineTest" tests="14" skipped="0" failures="0" errors="0" timestamp="2026-11-07T12:44:10.915Z" hostname="MacBook-Air.local" time="0.015">
   <properties/>
   <testcase name="extraIncomeSpreadsFromItsDay" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.007"/>
   <testcase name="savingsTargetReservedLikeFixedCosts" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.0"/>
@@ -8,13 +8,13 @@
   <testcase name="lastDayDividesByOne" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.0"/>
   <testcase name="timeZoneChangeMovesDayButKeepsPeriodTotal" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.004"/>
   <testcase name="dayOutsideRangeClampsToEdge" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.0"/>
-  <testcase name="workedExampleDayOneAfterSpending" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.0"/>
+  <testcase name="workedExampleDayOneAfterSpending" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.001"/>
   <testcase name="workedExampleDayOne" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.0"/>
   <testcase name="workedExampleDayTwo" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.0"/>
   <testcase name="overspendLowersRestOfPeriod" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.0"/>
   <testcase name="incomeBelowFixedShowsNegative" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.0"/>
   <testcase name="statusThresholds" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.0"/>
-  <testcase name="exhaustedPeriodShowsNegative" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.001"/>
+  <testcase name="exhaustedPeriodShowsNegative" classname="com.example.kisha.allowance.AllowanceEngineTest" time="0.0"/>
   <system-out><![CDATA[]]></system-out>
   <system-err><![CDATA[]]></system-err>
 </testsuite>
