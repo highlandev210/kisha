@@ -110,6 +110,18 @@ class HomeViewModelTest {
         }
     }
 
+    /** The pocket can't go below zero, so the coin must show the real change, not the sum of daily deltas. */
+    @Test fun celebrationShowsWhatActuallyChangedInThePocket() = runTest {
+        container.expenseRepository.add(100_000, null, "", time.now()) // Nov 1: ₹1,000 of ₹800 → −₹200, pocket stays ₹0
+        today.value = LocalDate.of(2026, 11, 3) // Nov 2 untouched: +₹793.10 → pocket ₹793.10
+        ready.test {
+            val s = awaitMatching { it.allowance.day == LocalDate.of(2026, 11, 3) && it.celebration != null }
+            assertEquals(79_310L, s.pocket.amountPaise)
+            assertEquals(79_310L, s.celebration!!.deltaPaise)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test fun severalUnseenDaysCelebrateAsOne() = runTest {
         today.value = LocalDate.of(2026, 11, 3) // Nov 1 and 2 untouched: +₹800 and +₹827
         ready.test {

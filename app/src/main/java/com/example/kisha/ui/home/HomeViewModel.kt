@@ -85,8 +85,11 @@ class HomeViewModel(
                                 .filter { range.clamp(it.occurredAt.localDateIn(zone)) == allowance.day }
                                 .map { ExpenseRow(it, it.categoryId?.let(byId::get)) },
                             pocket = pocket,
-                            celebration = unseen.takeIf { it.isNotEmpty() }
-                                ?.let { PocketCelebration(it.last().day, it.sumOf { d -> d.deltaPaise }) },
+                            // The real change in the pocket since the last coin (it never dips below zero,
+                            // so this can differ from the sum of the days' deltas).
+                            celebration = unseen.takeIf { it.isNotEmpty() }?.let {
+                                PocketCelebration(it.last().day, pocket.amountPaise - pocket.amountThrough(config.pocketShownThrough))
+                            },
                         )
                     }
                 }

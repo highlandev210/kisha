@@ -132,7 +132,8 @@ private fun DayTile(day: HistoryDay, isToday: Boolean, onExpenseClick: (Long) ->
                     )
                     StatusLabel(a, MaterialTheme.typography.labelLarge)
                 }
-                day.pocketDeltaPaise?.let { PocketPill(it, KishaTheme.colors.status(a.status).container, KishaTheme.colors.status(a.status).content) }
+                // Chip colours: bright against every tile, including the red "over" one.
+                day.pocketDeltaPaise?.let { PocketPill(it, KishaTheme.colors.status(a.status).chip, KishaTheme.colors.status(a.status).onChip) }
             }
             day.expenses.forEach { row ->
                 ExpenseListItem(row, onClick = { onExpenseClick(row.expense.id) })

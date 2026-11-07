@@ -12,7 +12,14 @@ data class Pocket(
     val streakDays: Int,
     /** Every finished day counted, oldest first. */
     val days: List<PocketDay>,
-)
+) {
+    /** What the pocket held at the end of [day] (0 when null or before the first day). */
+    fun amountThrough(day: LocalDate?): Long = if (day == null) {
+        0L
+    } else {
+        days.filter { !it.day.isAfter(day) }.fold(0L) { total, d -> maxOf(0L, total + d.deltaPaise) }
+    }
+}
 
 /**
  * The pocket collects what you didn't spend of each finished day's allowance. Only days that have
