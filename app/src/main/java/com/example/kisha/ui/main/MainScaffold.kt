@@ -20,13 +20,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.ShortNavigationBar
 import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -39,8 +42,10 @@ import androidx.compose.ui.semantics.semantics
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
+import kotlinx.coroutines.launch
 import com.example.kisha.AppContainer
 import com.example.kisha.R
+import com.example.kisha.data.db.ExpenseEntity
 import com.example.kisha.ui.entry.EntryTarget
 import com.example.kisha.ui.entry.EntryViewModel
 import com.example.kisha.ui.entry.QuickEntrySheet
@@ -64,6 +69,18 @@ enum class Tab(val label: Int, val icon: ImageVector) {
 fun MainScaffold(container: AppContainer) {
     var tab by rememberSaveable { mutableStateOf(Tab.TODAY) }
     val snackbarHostState = remember { SnackbarHostState() }
+    // Undo lives here, not in a tab's screen, so switching tabs doesn't cancel it.
+    val scope = rememberCoroutineScope()
+    val deletedMessage = stringResource(R.string.expense_deleted)
+    val undoLabel = stringResource(R.string.undo)
+    val offerUndo: (ExpenseEntity, (ExpenseEntity) -> Unit) -> Unit = { expense, restore ->
+        // One snackbar at a time, and its Undo restores exactly the expense it announced.
+        snackbarHostState.currentSnackbarData?.dismiss()
+        scope.launch {
+            val result = snackbarHostState.showSnackbar(deletedMessage, undoLabel, duration = SnackbarDuration.Short)
+            if (result == SnackbarResult.ActionPerformed) restore(expense)
+        }
+    }
     val wide = LocalConfiguration.current.screenWidthDp >= 600
     val homeViewModel = viewModel {
         HomeViewModel(container.budgetRepository, container.expenseRepository, container.today, container.time)
@@ -140,7 +157,12 @@ fun MainScaffold(container: AppContainer) {
         ) { padding ->
             Box(Modifier.padding(padding)) {
                 when (tab) {
-                    Tab.TODAY -> HomeScreen(homeViewModel, onExpenseClick = openExpense, snackbarHostState = snackbarHostState)
+                    Tab.TODAY -> HomeScreen(
+                        homeViewModel,
+                        onExpenseClick = openExpense,
+                        onDeleted = { offerUndo(it, homeViewModel::restore) },
+                        snackbarHostState = snackbarHostState,
+                    )
                     Tab.HISTORY -> HistoryScreen(historyViewModel, onExpenseClick = openExpense)
                     Tab.SETTINGS -> SettingsScreen(settingsViewModel)
                 }
@@ -148,5 +170,9 @@ fun MainScaffold(container: AppContainer) {
         }
     }
     val homeState by homeViewModel.state.collectAsStateWithLifecycle()
-    QuickEntrySheet(entryViewModel, today = (homeState as? HomeUiState.Ready)?.allowance)
+    QuickEntrySheet(
+        entryViewModel,
+        today = (homeState as? HomeUiState.Ready)?.allowance,
+        onDeleted = { offerUndo(it, entryViewModel::restore) },
+    )
 }

@@ -57,6 +57,7 @@ import com.example.kisha.R
 import com.example.kisha.allowance.AllowanceStatus
 import com.example.kisha.allowance.DateRange
 import com.example.kisha.allowance.DayAllowance
+import com.example.kisha.data.db.ExpenseEntity
 import com.example.kisha.ui.TestTags
 import com.example.kisha.ui.common.ConnectedChoice
 import com.example.kisha.ui.common.categoryIcon
@@ -71,7 +72,7 @@ import java.time.format.FormatStyle
 
 /** UI-4: quick entry in a modal bottom sheet. Shown while the view model has a target. */
 @Composable
-fun QuickEntrySheet(viewModel: EntryViewModel, today: DayAllowance?) {
+fun QuickEntrySheet(viewModel: EntryViewModel, today: DayAllowance?, onDeleted: (ExpenseEntity) -> Unit) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     if (state.target == null) return
     ModalBottomSheet(
@@ -79,12 +80,12 @@ fun QuickEntrySheet(viewModel: EntryViewModel, today: DayAllowance?) {
         // Hidden or fully expanded only, so the keypad is always on screen (EX-1).
         sheetState = rememberBottomSheetState(SheetValue.Hidden, setOf(SheetValue.Hidden, SheetValue.Expanded)),
     ) {
-        EntryContent(state, viewModel, today)
+        EntryContent(state, viewModel, today, onDeleted)
     }
 }
 
 @Composable
-private fun EntryContent(state: EntryUiState, viewModel: EntryViewModel, today: DayAllowance?) {
+private fun EntryContent(state: EntryUiState, viewModel: EntryViewModel, today: DayAllowance?, onDeleted: (ExpenseEntity) -> Unit) {
     var pickingDate by remember { mutableStateOf(false) }
     var pickedDate by remember { mutableStateOf<LocalDate?>(null) }
     val local = state.occurredAt.atZone(state.zone)
@@ -144,7 +145,7 @@ private fun EntryContent(state: EntryUiState, viewModel: EntryViewModel, today: 
                 )
             }
             if (state.target is EntryTarget.EditExpense) {
-                TextButton(onClick = viewModel::deleteEditing, modifier = Modifier.heightIn(min = 48.dp)) {
+                TextButton(onClick = { viewModel.deleteEditing(onDeleted) }, modifier = Modifier.heightIn(min = 48.dp)) {
                     Text(stringResource(R.string.entry_delete), color = MaterialTheme.colorScheme.error)
                 }
             }

@@ -34,9 +34,7 @@ import androidx.compose.material3.LinearWavyProgressIndicator
 import androidx.compose.material3.LoadingIndicator
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Surface
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
@@ -90,11 +88,17 @@ import kotlin.math.roundToLong
 import kotlin.math.sin
 
 @Composable
-fun HomeScreen(viewModel: HomeViewModel, onExpenseClick: (Long) -> Unit, snackbarHostState: SnackbarHostState) {
+fun HomeScreen(
+    viewModel: HomeViewModel,
+    onExpenseClick: (Long) -> Unit,
+    /** Called after a swipe delete; the caller offers Undo from a scope that outlives this screen. */
+    onDeleted: (ExpenseEntity) -> Unit,
+    snackbarHostState: SnackbarHostState,
+) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     when (val s = state) {
         HomeUiState.Loading -> Box(Modifier.fillMaxSize(), contentAlignment = Alignment.Center) { LoadingIndicator() }
-        is HomeUiState.Ready -> HomeContent(s, viewModel, onExpenseClick, snackbarHostState)
+        is HomeUiState.Ready -> HomeContent(s, viewModel, onExpenseClick, onDeleted, snackbarHostState)
     }
 }
 
@@ -103,6 +107,7 @@ private fun HomeContent(
     s: HomeUiState.Ready,
     viewModel: HomeViewModel,
     onExpenseClick: (Long) -> Unit,
+    onDeleted: (ExpenseEntity) -> Unit,
     snackbarHostState: SnackbarHostState,
 ) {
     val formatter = LocalMoneyFormatter.current
@@ -111,8 +116,6 @@ private fun HomeContent(
     val status = KishaTheme.colors.status(s.allowance.status)
     val header by animateColorAsState(status.container, effects, label = "header")
     val onHeader by animateColorAsState(status.content, effects, label = "onHeader")
-    val deletedMessage = stringResource(R.string.expense_deleted)
-    val undoLabel = stringResource(R.string.undo)
 
     // Pocket hero moment: a coin flies from today's number into the pocket for each unseen finished day.
     var boxOrigin by remember { mutableStateOf(Offset.Zero) }
@@ -181,12 +184,7 @@ private fun HomeContent(
                     onClick = { onExpenseClick(row.expense.id) },
                     onDelete = {
                         viewModel.delete(row.expense)
-                        // One snackbar at a time, and its Undo restores exactly the expense it announced.
-                        snackbarHostState.currentSnackbarData?.dismiss()
-                        scope.launch {
-                            val result = snackbarHostState.showSnackbar(deletedMessage, undoLabel, duration = SnackbarDuration.Short)
-                            if (result == SnackbarResult.ActionPerformed) viewModel.restore(row.expense)
-                        }
+                        onDeleted(row.expense)
                     },
                     modifier = Modifier.animateItem(
                         placementSpec = spring(dampingRatio = 0.6f, stiffness = Spring.StiffnessMediumLow),
