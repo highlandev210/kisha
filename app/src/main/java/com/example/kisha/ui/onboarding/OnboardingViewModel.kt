@@ -32,10 +32,17 @@ data class OnboardingState(
     val paydayMode: PaydayMode = PaydayMode.DAY_OF_MONTH,
     val paydayText: String = "1",
     val fixedCosts: List<NewFixedCost> = emptyList(),
+    /** The fixed-cost form on step 3, kept here so Next can add what was typed but not added. */
+    val draftName: String = "",
+    val draftAmount: String = "",
+    val draftDueDay: String = "",
+    val draftError: Boolean = false,
     val preview: DayAllowance? = null,
     val finishing: Boolean = false,
 ) {
     val incomePaise: Long get() = Money.parsePaise(incomeText) ?: 0
+
+    val draftBlank: Boolean get() = draftName.isBlank() && draftAmount.isBlank() && draftDueDay.isBlank()
 
     /** Null while a payday cycle has an invalid day typed in. */
     val cycleStart: CycleStart?
@@ -74,12 +81,15 @@ class OnboardingViewModel(
 
     fun setPaydayText(text: String) = _state.update { it.copy(paydayText = text.filter(Char::isDigit).take(2)) }
 
-    /** Returns false (and adds nothing) unless the name is set, the amount is above zero and the due day is empty or 1–31. */
-    fun addFixedCost(name: String, amountText: String, dueDayText: String): Boolean {
-        val cost = parseFixedCost(name, amountText, dueDayText) ?: return false
-        _state.update { it.copy(fixedCosts = it.fixedCosts + cost) }
-        return true
-    }
+    fun setDraftName(text: String) = _state.update { it.copy(draftName = text, draftError = false) }
+
+    fun setDraftAmount(text: String) = _state.update { it.copy(draftAmount = text, draftError = false) }
+
+    fun setDraftDueDay(text: String) =
+        _state.update { it.copy(draftDueDay = text.filter(Char::isDigit).take(2), draftError = false) }
+
+    /** Adds the drafted fixed cost; on invalid input keeps the draft and flags the error instead. */
+    fun addDraft() = _state.update(::withDraftAdded)
 
     fun removeFixedCost(index: Int) = _state.update {
         it.copy(fixedCosts = it.fixedCosts.filterIndexed { i, _ -> i != index })
@@ -88,9 +98,18 @@ class OnboardingViewModel(
     fun next() = _state.update {
         when {
             !it.canAdvance || it.step >= OnboardingState.STEPS - 1 -> it
-            it.step == 2 -> it.copy(step = 3, preview = preview(it))
+            it.step == 2 -> {
+                // A filled-in form counts as "Add" — never drop what the user typed.
+                val added = if (it.draftBlank) it else withDraftAdded(it)
+                if (added.draftError) added else added.copy(step = 3, preview = preview(added))
+            }
             else -> it.copy(step = it.step + 1)
         }
+    }
+
+    private fun withDraftAdded(s: OnboardingState): OnboardingState {
+        val cost = parseFixedCost(s.draftName, s.draftAmount, s.draftDueDay) ?: return s.copy(draftError = true)
+        return s.copy(fixedCosts = s.fixedCosts + cost, draftName = "", draftAmount = "", draftDueDay = "", draftError = false)
     }
 
     fun back() = _state.update { if (it.step > 0) it.copy(step = it.step - 1) else it }

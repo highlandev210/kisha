@@ -1,11 +1,13 @@
 package com.example.kisha.ui.onboarding
 
 import androidx.annotation.StringRes
+import androidx.compose.ui.test.assertCountEquals
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
 import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
@@ -98,5 +100,25 @@ class OnboardingTest {
         Espresso.pressBack()
 
         compose.onNodeWithTag(TestTags.INCOME_FIELD).assertTextContains("60000")
+    }
+
+    /** Typing a fixed cost and tapping the main button (without "Add") must not lose it. */
+    @Test fun typedFixedCostIsKeptWhenTappingNext() {
+        enterIncomeAndMonth("60000")
+        compose.onNodeWithTag(TestTags.FIXED_NAME_FIELD).performTextInput("Rent")
+        compose.onNodeWithTag(TestTags.FIXED_AMOUNT_FIELD).performTextInput("36000")
+        compose.onNodeWithText(s(R.string.onboarding_next)).performClick()
+
+        compose.onNodeWithTag(TestTags.PREVIEW_ALLOWANCE).assertTextEquals("₹800")
+    }
+
+    @Test fun incompleteFixedCostBlocksNext() {
+        enterIncomeAndMonth("60000")
+        compose.onNodeWithTag(TestTags.FIXED_NAME_FIELD).performTextInput("Rent")
+        compose.onNodeWithText(s(R.string.onboarding_next)).performClick()
+
+        compose.onNodeWithTag(TestTags.FIXED_NAME_FIELD).assertExists()
+        compose.onAllNodesWithTag(TestTags.PREVIEW_ALLOWANCE).assertCountEquals(0)
+        compose.onNodeWithText(s(R.string.fixed_invalid)).assertExists()
     }
 }

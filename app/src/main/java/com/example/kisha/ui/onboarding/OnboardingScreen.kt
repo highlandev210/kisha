@@ -30,14 +30,14 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.LiveRegionMode
+import androidx.compose.ui.semantics.liveRegion
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -77,7 +77,7 @@ fun OnboardingScreen(container: AppContainer) {
                 Spacer(Modifier.weight(1f))
                 val label = when {
                     state.step == 3 -> R.string.onboarding_start
-                    state.step == 2 && state.fixedCosts.isEmpty() -> R.string.onboarding_skip
+                    state.step == 2 && state.fixedCosts.isEmpty() && state.draftBlank -> R.string.onboarding_skip
                     else -> R.string.onboarding_next
                 }
                 Button(
@@ -191,49 +191,51 @@ private fun FixedCostsStep(state: OnboardingState, viewModel: OnboardingViewMode
             }
         }
     }
-    FixedCostForm(onAdd = viewModel::addFixedCost)
+    FixedCostForm(state, viewModel)
 }
 
-/** Name, amount and optional due day; clears itself after a successful add. */
+/** Name, amount and optional due day. State lives in the view model so Next can add a typed-in cost. */
 @Composable
-fun FixedCostForm(onAdd: (name: String, amount: String, dueDay: String) -> Boolean) {
-    var name by rememberSaveable { mutableStateOf("") }
-    var amount by rememberSaveable { mutableStateOf("") }
-    var dueDay by rememberSaveable { mutableStateOf("") }
+private fun FixedCostForm(state: OnboardingState, viewModel: OnboardingViewModel) {
     OutlinedTextField(
-        value = name,
-        onValueChange = { name = it },
+        value = state.draftName,
+        onValueChange = viewModel::setDraftName,
         label = { Text(stringResource(R.string.fixed_name_label)) },
         singleLine = true,
+        isError = state.draftError,
         modifier = Modifier.fillMaxWidth().testTag(TestTags.FIXED_NAME_FIELD),
     )
     Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         OutlinedTextField(
-            value = amount,
-            onValueChange = { amount = it },
+            value = state.draftAmount,
+            onValueChange = viewModel::setDraftAmount,
             label = { Text(stringResource(R.string.fixed_amount_label)) },
             prefix = { Text(LocalMoneyFormatter.current.symbol) },
             singleLine = true,
+            isError = state.draftError,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Decimal),
             modifier = Modifier.weight(1f).testTag(TestTags.FIXED_AMOUNT_FIELD),
         )
         OutlinedTextField(
-            value = dueDay,
-            onValueChange = { dueDay = it.filter(Char::isDigit).take(2) },
+            value = state.draftDueDay,
+            onValueChange = viewModel::setDraftDueDay,
             label = { Text(stringResource(R.string.fixed_due_day_label)) },
             singleLine = true,
+            isError = state.draftError,
             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
             modifier = Modifier.weight(1f),
         )
     }
+    if (state.draftError) {
+        Text(
+            stringResource(R.string.fixed_invalid),
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.error,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        )
+    }
     FilledTonalButton(
-        onClick = {
-            if (onAdd(name, amount, dueDay)) {
-                name = ""
-                amount = ""
-                dueDay = ""
-            }
-        },
+        onClick = viewModel::addDraft,
         shapes = ButtonDefaults.shapes(),
         modifier = Modifier.heightIn(min = 56.dp),
     ) {

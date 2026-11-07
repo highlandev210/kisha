@@ -34,6 +34,7 @@
     <string name="fixed_add">Add</string>
     <string name="fixed_remove">Remove %1$s</string>
     <string name="fixed_due_on">Due on day %1$d</string>
+    <string name="fixed_invalid">Add a name and an amount above zero. Due day, if set, is 1–31.</string>
 
     <!-- Default categories (CT-1) -->
     <string name="category_food">Food</string>
