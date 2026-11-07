@@ -6,13 +6,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.kisha"
+    namespace = "io.github.highlandev210.kisha"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.example.kisha"
+        applicationId = "io.github.highlandev210.kisha"
         minSdk = 29
         targetSdk = 37
         versionCode = 1
