@@ -132,8 +132,11 @@ private fun DayTile(day: HistoryDay, isToday: Boolean, onExpenseClick: (Long) ->
                     )
                     StatusLabel(a, MaterialTheme.typography.labelLarge)
                 }
-                // Chip colours: bright against every tile, including the red "over" one.
-                day.pocketDeltaPaise?.let { PocketPill(it, KishaTheme.colors.status(a.status).chip, KishaTheme.colors.status(a.status).onChip) }
+                // Whichever status colour differs from the tile, so the pill never blends in
+                // (the chip matches the tile for "over" in light mode, the header colour does in dark).
+                val pill = KishaTheme.colors.status(a.status)
+                val (pillColor, onPill) = if (pill.chip == tile) pill.container to pill.content else pill.chip to pill.onChip
+                day.pocketDeltaPaise?.let { PocketPill(it, pillColor, onPill) }
             }
             day.expenses.forEach { row ->
                 ExpenseListItem(row, onClick = { onExpenseClick(row.expense.id) })
