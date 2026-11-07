@@ -50,6 +50,7 @@ class BudgetRepository(private val db: KishaDatabase, private val time: TimeSour
                     periodType = input.periodType,
                     cycleStartDay = rule.stored,
                     baseIncome = input.baseIncomePaise,
+                    setupDate = today,
                 ),
             )
             input.fixedCosts.forEach {
@@ -136,6 +137,14 @@ class BudgetRepository(private val db: KishaDatabase, private val time: TimeSour
     }
 
     suspend fun deleteIncome(income: IncomeEntity) = incomeDao.delete(income)
+
+    /** Records that the pocket animation for [day] has played, so it shows once per finished day. */
+    suspend fun markPocketShown(day: LocalDate) = db.withTransaction {
+        val config = configDao.get() ?: return@withTransaction
+        if (config.pocketShownThrough == null || day.isAfter(config.pocketShownThrough)) {
+            configDao.upsert(config.copy(pocketShownThrough = day))
+        }
+    }
 
     suspend fun setCurrency(symbol: String, indianGrouping: Boolean) = db.withTransaction {
         val config = checkNotNull(configDao.get()) { "setup not complete" }

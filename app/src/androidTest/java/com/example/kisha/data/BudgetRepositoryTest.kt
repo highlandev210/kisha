@@ -67,6 +67,17 @@ class BudgetRepositoryTest {
         assertEquals(8, db.categoryDao().count())
     }
 
+    @Test fun completeSetupRecordsTheSetupDay() = runTest {
+        setUpNovember()
+        assertEquals(d(2026, 11, 7), repo.config.first()!!.setupDate)
+    }
+
+    @Test fun markPocketShownRemembersTheDay() = runTest {
+        setUpNovember()
+        repo.markPocketShown(d(2026, 11, 8))
+        assertEquals(d(2026, 11, 8), repo.config.first()!!.pocketShownThrough)
+    }
+
     @Test fun customPaydaySetup() = runTest {
         repo.completeSetup(monthlySetup(CycleStart.DayOfMonth(7), PeriodType.CUSTOM), categories, d(2026, 11, 7))
         val period = repo.periods.first().single()

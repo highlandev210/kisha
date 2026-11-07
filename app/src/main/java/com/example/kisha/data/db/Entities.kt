@@ -25,6 +25,10 @@ data class BudgetConfigEntity(
     val allowanceMode: AllowanceMode = AllowanceMode.SPREAD,
     val currency: String = "₹",
     val indianGrouping: Boolean = true,
+    /** The day setup finished; the pocket only counts days from here (schema v2). */
+    val setupDate: LocalDate? = null,
+    /** The last finished day whose pocket coin animation has played (schema v2). */
+    val pocketShownThrough: LocalDate? = null,
 )
 
 /** One row per cycle: a snapshot, so history stays correct after settings change. */
