@@ -32,6 +32,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -45,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.kisha.R
 import com.example.kisha.data.db.FixedCostEntity
+import com.example.kisha.data.db.IncomeEntity
 import com.example.kisha.ui.common.ConnectedChoice
 import com.example.kisha.ui.entry.AmountInput
 import com.example.kisha.ui.format.LocalMoneyFormatter
@@ -107,22 +109,46 @@ private fun IncomeSection(state: SettingsUiState.Ready, viewModel: SettingsViewM
         if (state.extraIncome.isEmpty()) {
             Text(stringResource(R.string.settings_no_extra_income), style = MaterialTheme.typography.bodyMedium)
         }
+        var confirming by remember { mutableStateOf<IncomeEntity?>(null) }
+        val incomeName = stringResource(R.string.entry_mode_income)
         state.extraIncome.forEach { item ->
-            val name = item.note.ifBlank { stringResource(R.string.entry_mode_income) }
+            val name = item.note.ifBlank { incomeName }
             ListItem(
                 colors = ListItemDefaults.colors(containerColor = Color.Transparent),
                 supportingContent = { Text(item.occurredAt.atZone(ZoneId.systemDefault()).format(dayMonth)) },
                 trailingContent = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(formatter.format(item.amountPaise))
-                        IconButton(onClick = { viewModel.deleteIncome(item) }) {
+                        IconButton(onClick = { confirming = item }) {
                             Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.settings_delete_named, name))
                         }
                     }
                 },
             ) { Text(name) }
         }
+        confirming?.let { item ->
+            ConfirmDelete(
+                name = item.note.ifBlank { incomeName },
+                body = R.string.settings_confirm_delete_income,
+                onConfirm = { viewModel.deleteIncome(item); confirming = null },
+                onDismiss = { confirming = null },
+            )
+        }
     }
+}
+
+/** Deleting money that's set aside (or extra income) silently changes the daily number, so ask first. */
+@Composable
+private fun ConfirmDelete(name: String, body: Int, onConfirm: () -> Unit, onDismiss: () -> Unit) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.settings_confirm_delete_title, name)) },
+        text = { Text(stringResource(body)) },
+        confirmButton = {
+            TextButton(onClick = onConfirm) { Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error) }
+        },
+        dismissButton = { TextButton(onClick = onDismiss) { Text(stringResource(R.string.dialog_cancel)) } },
+    )
 }
 
 /** FC-1/FC-2: add, edit and delete fixed costs; edits apply to this period straight away. */
@@ -131,6 +157,15 @@ private fun FixedCostsSection(costs: List<FixedCostEntity>, viewModel: SettingsV
     val formatter = LocalMoneyFormatter.current
     var editing by rememberSaveable { mutableStateOf<Long?>(null) }
     var adding by rememberSaveable { mutableStateOf(false) }
+    var confirming by remember { mutableStateOf<FixedCostEntity?>(null) }
+    confirming?.let { cost ->
+        ConfirmDelete(
+            name = cost.name,
+            body = R.string.settings_confirm_delete_fixed,
+            onConfirm = { viewModel.deleteFixedCost(cost); confirming = null },
+            onDismiss = { confirming = null },
+        )
+    }
     Section(R.string.settings_fixed_title) {
         if (costs.isEmpty()) {
             Text(stringResource(R.string.settings_fixed_empty), style = MaterialTheme.typography.bodyMedium)
@@ -143,7 +178,7 @@ private fun FixedCostsSection(costs: List<FixedCostEntity>, viewModel: SettingsV
                 trailingContent = {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Text(formatter.format(cost.amountPaise))
-                        IconButton(onClick = { viewModel.deleteFixedCost(cost) }) {
+                        IconButton(onClick = { confirming = cost }) {
                             Icon(Icons.Outlined.Delete, contentDescription = stringResource(R.string.settings_delete_named, cost.name))
                         }
                     }
