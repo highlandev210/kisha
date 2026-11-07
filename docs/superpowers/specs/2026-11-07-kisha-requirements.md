@@ -4,13 +4,13 @@
 
 ## Overview
 
-Kisha (കീശ, "pocket") is an open-source, offline-first Android expense tracker that answers one question on its home screen: how much can I spend today? It is a functional clone of the daily-allowance idea behind Chelav, built as a fully native Android app (Kotlin, Jetpack Compose, minSdk 29) with Indian defaults. No cross-platform frameworks (Flutter, React Native, Compose Multiplatform UI), no WebView screens, and no PWA wrapper.
+Kisha (കീശ, "pocket") is an open-source, offline-first Android expense tracker that answers one question on its home screen: how much can I spend today? It is built around the daily-allowance budgeting approach, as a fully native Android app (Kotlin, Jetpack Compose, minSdk 29) with Indian defaults. No cross-platform frameworks (Flutter, React Native, Compose Multiplatform UI), no WebView screens, and no PWA wrapper.
 
 **v1 scope:** set up a budget period, log expenses in seconds, see today's allowance update live, review history, and back up or export data. Everything works without an account or internet.
 
 **Non-goals for v1:** bank account linking, investment tracking, multi-currency wallets, cloud sync (optional sync is planned for Later), SMS or notification parsing, ads, and any analytics or tracking SDK.
 
-**Open-source principles:** Apache-2.0 licence, no proprietary dependencies (F-Droid buildable), all data stays on the device unless the user exports it, and original name, branding and UI copy — nothing copied from Chelav.
+**Open-source principles:** Apache-2.0 licence, no proprietary dependencies (F-Droid buildable), all data stays on the device unless the user exports it, and original name, branding and UI copy — nothing copied from other apps.
 
 ## Allowance calculation
 
