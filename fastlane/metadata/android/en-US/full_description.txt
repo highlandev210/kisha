@@ -1,0 +1,22 @@
+Kisha (കീശ, "pocket") answers one question every time you open it: how much can I spend today?
+
+Tell it your income for the period and the money that's already spoken for (rent, EMIs, subscriptions). Kisha spreads the rest across the days left and shows today's number, big and bold. Log an expense in two taps and the number updates instantly. Spend less than your allowance and the leftover drops into your pocket at midnight; overspend and it comes back out.
+
+<b>Features</b>
+<ul>
+<li>Today's allowance, recalculated every midnight. Underspending raises tomorrow's number, overspending lowers it</li>
+<li>Status at a glance: teal when you're on track, amber when running low, red when you're over (always with words and an icon too)</li>
+<li>The pocket: what you didn't spend each day collects here, with a coin animation and an under-budget streak</li>
+<li>Quick entry with a big keypad; the colour previews what today will look like after the expense</li>
+<li>History as day tiles showing what each day added to or took from the pocket</li>
+<li>Calendar-month or payday cycles (any day of the month, or the last working day)</li>
+<li>Fixed costs, extra income, Indian number grouping (₹1,00,000) or international</li>
+<li>Material 3 Expressive design, light and dark</li>
+</ul>
+
+<b>Private by design</b>
+<ul>
+<li>No internet permission at all. Your data never leaves your phone</li>
+<li>No account, no ads, no analytics, no Google Play Services</li>
+<li>Free and open source under the Apache 2.0 licence</li>
+</ul>

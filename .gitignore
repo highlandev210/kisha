@@ -14,3 +14,11 @@
 .cxx
 local.properties
 /.superpowers/
+
+# Signing keys must never be committed
+*.jks
+*.keystore
+*.p12
+keystore.properties
+/.idea/
+/.kotlin/

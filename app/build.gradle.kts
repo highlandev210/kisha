@@ -15,10 +15,25 @@ android {
         applicationId = "io.github.highlandev210.kisha"
         minSdk = 29
         targetSdk = 37
+        // Bump both for every release; the release workflow checks the git tag matches versionName.
         versionCode = 1
-        versionName = "1.0"
+        versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+    }
+
+    // Release signing comes from the environment (GitHub Actions secrets, or exported locally).
+    // Without it, release builds are produced unsigned, which is what F-Droid expects.
+    val releaseKeystore = System.getenv("KISHA_KEYSTORE_FILE")?.let(::file)?.takeIf { it.exists() }
+    signingConfigs {
+        if (releaseKeystore != null) {
+            create("release") {
+                storeFile = releaseKeystore
+                storePassword = System.getenv("KISHA_KEYSTORE_PASSWORD")
+                keyAlias = System.getenv("KISHA_KEY_ALIAS")
+                keyPassword = System.getenv("KISHA_KEY_PASSWORD")
+            }
+        }
     }
 
     buildTypes {
@@ -27,7 +42,14 @@ android {
                 enable = true
                 packageScope = setOf("androidx.**", "kotlin.**", "kotlinx.**")
             }
+            if (releaseKeystore != null) signingConfig = signingConfigs.getByName("release")
         }
+    }
+
+    // Reproducible builds (NF-9): no build timestamps or VCS info baked into the APK.
+    dependenciesInfo {
+        includeInApk = false
+        includeInBundle = false
     }
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11

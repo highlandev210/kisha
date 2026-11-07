@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Android 13+ themed icon: the same coin and pocket as line art in one colour (the launcher tints it). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Scaled to 88% so the coin keeps clear of round launcher masks. -->
+    <group android:pivotX="54" android:pivotY="54" android:scaleX="0.88" android:scaleY="0.88">
+    <path
+        android:fillColor="#00000000"
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="3"
+        android:pathData="M54,24 a14.5,14.5 0 1,0 0.01,0" />
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M34,46 L74,46 Q78,46 77.6,50 L76,68 Q75.6,71 73,72.6 L56.5,81.4 Q54,82.8 51.5,81.4 L35,72.6 Q32.4,71 32,68 L30.4,50 Q30,46 34,46 Z" />
+    </group>
+</vector>
