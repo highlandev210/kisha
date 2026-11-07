@@ -61,10 +61,28 @@ class HomeViewModelTest {
         container.expenseRepository.add(20_000, null, "lunch", time.now())
         ready.test {
             val withExpense = awaitMatching { it.todayExpenses.size == 1 }
-            vm.delete(withExpense.todayExpenses.single().expense)
+            val lunch = withExpense.todayExpenses.single().expense
+            vm.delete(lunch)
             awaitMatching { it.todayExpenses.isEmpty() }
-            vm.undoDelete()
+            vm.restore(lunch)
             assertEquals("lunch", awaitMatching { it.todayExpenses.size == 1 }.todayExpenses.single().expense.note)
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
+    /** Two quick swipes queue two snackbars; Undo on the first must bring back the first expense. */
+    @Test fun undoAfterTwoDeletesRestoresTheRightExpense() = runTest {
+        container.expenseRepository.add(20_000, null, "lunch", time.now())
+        container.expenseRepository.add(5_000, null, "chai", time.now().plusSeconds(60))
+        ready.test {
+            val both = awaitMatching { it.todayExpenses.size == 2 }.todayExpenses.map { it.expense }
+            val lunch = both.single { it.note == "lunch" }
+            val chai = both.single { it.note == "chai" }
+            vm.delete(lunch)
+            vm.delete(chai)
+            awaitMatching { it.todayExpenses.isEmpty() }
+            vm.restore(lunch)
+            assertEquals(listOf("lunch"), awaitMatching { it.todayExpenses.size == 1 }.todayExpenses.map { it.expense.note })
             cancelAndIgnoreRemainingEvents()
         }
     }

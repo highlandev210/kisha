@@ -81,13 +81,15 @@ fun HomeScreen(viewModel: HomeViewModel, onExpenseClick: (Long) -> Unit, snackba
                     onExpenseClick = onExpenseClick,
                     onDelete = { expense ->
                         viewModel.delete(expense)
+                        // One snackbar at a time, and its Undo restores exactly the expense it announced.
+                        snackbarHostState.currentSnackbarData?.dismiss()
                         scope.launch {
                             val result = snackbarHostState.showSnackbar(
                                 message = deletedMessage,
                                 actionLabel = undoLabel,
                                 duration = SnackbarDuration.Short,
                             )
-                            if (result == SnackbarResult.ActionPerformed) viewModel.undoDelete()
+                            if (result == SnackbarResult.ActionPerformed) viewModel.restore(expense)
                         }
                     },
                 )

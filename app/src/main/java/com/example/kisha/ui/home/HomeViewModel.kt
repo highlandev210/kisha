@@ -44,8 +44,6 @@ class HomeViewModel(
     today: Flow<LocalDate>,
     private val time: TimeSource,
 ) : ViewModel() {
-    private var lastDeleted: ExpenseEntity? = null
-
     /** Derived on every change, never stored (rules 3 and 7). */
     val state: StateFlow<HomeUiState> = today
         .flatMapLatest { day ->
@@ -82,13 +80,11 @@ class HomeViewModel(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), HomeUiState.Loading)
 
     fun delete(expense: ExpenseEntity) {
-        lastDeleted = expense
         viewModelScope.launch { expenses.delete(expense) }
     }
 
-    fun undoDelete() {
-        val expense = lastDeleted ?: return
-        lastDeleted = null
+    /** Undo for [delete]. Takes the expense itself so each snackbar restores the row it announced. */
+    fun restore(expense: ExpenseEntity) {
         viewModelScope.launch { expenses.restore(expense) }
     }
 }
