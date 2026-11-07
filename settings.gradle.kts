@@ -24,3 +24,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "kisha"
 include(":app")
+include(":core:allowance")
