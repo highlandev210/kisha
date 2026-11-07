@@ -88,6 +88,8 @@
     <string name="entry_save">Save</string>
     <string name="entry_delete">Delete expense</string>
     <string name="entry_today_at">Today, %1$s</string>
+    <string name="entry_left_after">%1$s left today after this</string>
+    <string name="entry_over_after">Over by %1$s today after this</string>
     <string name="entry_date_time">Date and time</string>
     <string name="keypad_backspace">Delete digit</string>
     <string name="keypad_dot">Decimal point</string>
@@ -98,6 +100,7 @@
     <string name="history_spent_of">%1$s of %2$s</string>
     <string name="history_previous">Previous period</string>
     <string name="history_next">Next period</string>
+    <string name="history_today">Today so far</string>
 
     <!-- Settings -->
     <string name="settings_income_title">Income this period</string>

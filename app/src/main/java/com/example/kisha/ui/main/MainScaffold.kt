@@ -37,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.core.view.WindowCompat
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.kisha.AppContainer
 import com.example.kisha.R
@@ -46,6 +47,7 @@ import com.example.kisha.ui.entry.QuickEntrySheet
 import com.example.kisha.ui.history.HistoryScreen
 import com.example.kisha.ui.history.HistoryViewModel
 import com.example.kisha.ui.home.HomeScreen
+import com.example.kisha.ui.home.HomeUiState
 import com.example.kisha.ui.home.HomeViewModel
 import com.example.kisha.ui.settings.SettingsScreen
 import com.example.kisha.ui.settings.SettingsViewModel
@@ -145,5 +147,6 @@ fun MainScaffold(container: AppContainer) {
             }
         }
     }
-    QuickEntrySheet(entryViewModel)
+    val homeState by homeViewModel.state.collectAsStateWithLifecycle()
+    QuickEntrySheet(entryViewModel, today = (homeState as? HomeUiState.Ready)?.allowance)
 }

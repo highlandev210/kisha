@@ -124,8 +124,9 @@ private fun HomeContent(
     var coin by remember { mutableStateOf<PocketCelebration?>(null) }
     val celebration = s.celebration
     var revealed by remember(celebration?.throughDay) { mutableStateOf(celebration == null) }
-    val pocketIn = celebration?.let { stringResource(R.string.home_pocket_in, formatter.format(it.deltaPaise)) }
-    val pocketOut = celebration?.let { stringResource(R.string.home_pocket_out, formatter.format(-it.deltaPaise)) }
+    // Whole rupees, matching the pocket figure and the coin.
+    val pocketIn = celebration?.let { stringResource(R.string.home_pocket_in, formatter.formatWhole(it.deltaPaise)) }
+    val pocketOut = celebration?.let { stringResource(R.string.home_pocket_out, formatter.formatWhole(-it.deltaPaise)) }
 
     LaunchedEffect(celebration) {
         val c = celebration ?: return@LaunchedEffect

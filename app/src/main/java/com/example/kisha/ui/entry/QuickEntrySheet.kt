@@ -1,6 +1,8 @@
 package com.example.kisha.ui.entry
 
 import android.text.format.DateFormat
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -41,6 +43,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -50,11 +54,14 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.kisha.R
+import com.example.kisha.allowance.AllowanceStatus
 import com.example.kisha.allowance.DateRange
+import com.example.kisha.allowance.DayAllowance
 import com.example.kisha.ui.TestTags
 import com.example.kisha.ui.common.ConnectedChoice
 import com.example.kisha.ui.common.categoryIcon
 import com.example.kisha.ui.format.LocalMoneyFormatter
+import com.example.kisha.ui.theme.KishaTheme
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalTime
@@ -64,7 +71,7 @@ import java.time.format.FormatStyle
 
 /** UI-4: quick entry in a modal bottom sheet. Shown while the view model has a target. */
 @Composable
-fun QuickEntrySheet(viewModel: EntryViewModel) {
+fun QuickEntrySheet(viewModel: EntryViewModel, today: DayAllowance?) {
     val state by viewModel.state.collectAsStateWithLifecycle()
     if (state.target == null) return
     ModalBottomSheet(
@@ -72,13 +79,12 @@ fun QuickEntrySheet(viewModel: EntryViewModel) {
         // Hidden or fully expanded only, so the keypad is always on screen (EX-1).
         sheetState = rememberBottomSheetState(SheetValue.Hidden, setOf(SheetValue.Hidden, SheetValue.Expanded)),
     ) {
-        EntryContent(state, viewModel)
+        EntryContent(state, viewModel, today)
     }
 }
 
 @Composable
-private fun EntryContent(state: EntryUiState, viewModel: EntryViewModel) {
-    val formatter = LocalMoneyFormatter.current
+private fun EntryContent(state: EntryUiState, viewModel: EntryViewModel, today: DayAllowance?) {
     var pickingDate by remember { mutableStateOf(false) }
     var pickedDate by remember { mutableStateOf<LocalDate?>(null) }
     val local = state.occurredAt.atZone(state.zone)
@@ -100,11 +106,7 @@ private fun EntryContent(state: EntryUiState, viewModel: EntryViewModel) {
                 onSelect = viewModel::setMode,
             )
         }
-        Text(
-            formatter.symbol + state.amount.text.ifEmpty { "0" },
-            style = MaterialTheme.typography.displayMediumEmphasized,
-            modifier = Modifier.fillMaxWidth().semantics { liveRegion = LiveRegionMode.Polite },
-        )
+        AmountHeader(state, today)
         if (state.mode == EntryMode.EXPENSE) {
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 items(state.categories, key = { it.id }) { category ->
@@ -173,6 +175,50 @@ private fun EntryContent(state: EntryUiState, viewModel: EntryViewModel) {
             onPicked = { viewModel.setDateTime(date, it); pickedDate = null },
             onDismiss = { pickedDate = null },
         )
+    }
+}
+
+/**
+ * The typed amount in a block coloured by what today will look like after saving it, so the colour
+ * shifts towards amber or red as you type (new expenses only; income and edits stay teal).
+ */
+@Composable
+private fun AmountHeader(state: EntryUiState, today: DayAllowance?) {
+    val formatter = LocalMoneyFormatter.current
+    val projection = if (state.mode == EntryMode.EXPENSE && state.target == EntryTarget.NewExpense && today != null) {
+        project(today, state.amount.paise)
+    } else {
+        null
+    }
+    val colors = KishaTheme.colors.status(projection?.status ?: AllowanceStatus.ON_TRACK)
+    val effects = MaterialTheme.motionScheme.defaultEffectsSpec<Color>()
+    val block by animateColorAsState(colors.container, effects, label = "entryBlock")
+    val onBlock by animateColorAsState(colors.content, effects, label = "onEntryBlock")
+    Column(
+        Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.extraLarge)
+            .background(block)
+            .padding(horizontal = 20.dp, vertical = 16.dp),
+    ) {
+        Text(
+            formatter.symbol + state.amount.text.ifEmpty { "0" },
+            style = MaterialTheme.typography.displayMediumEmphasized,
+            color = onBlock,
+            maxLines = 1,
+            modifier = Modifier.semantics { liveRegion = LiveRegionMode.Polite },
+        )
+        if (projection != null) {
+            Text(
+                if (projection.remainingPaise >= 0) {
+                    stringResource(R.string.entry_left_after, formatter.formatWhole(projection.remainingPaise))
+                } else {
+                    stringResource(R.string.entry_over_after, formatter.format(-projection.remainingPaise))
+                },
+                style = MaterialTheme.typography.labelLarge,
+                color = onBlock,
+            )
+        }
     }
 }
 

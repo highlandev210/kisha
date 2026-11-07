@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.kisha.allowance.AllowanceEngine
 import com.example.kisha.allowance.DayAllowance
+import com.example.kisha.allowance.PocketEngine
 import com.example.kisha.allowance.localDateIn
 import com.example.kisha.data.BudgetRepository
 import com.example.kisha.data.ExpenseRepository
@@ -27,7 +28,12 @@ import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import java.time.LocalDate
 
-data class HistoryDay(val allowance: DayAllowance, val expenses: List<ExpenseRow>)
+data class HistoryDay(
+    val allowance: DayAllowance,
+    val expenses: List<ExpenseRow>,
+    /** What this finished day added to (+) or took from (−) the pocket; null for today and days before setup. */
+    val pocketDeltaPaise: Long?,
+)
 
 sealed interface HistoryUiState {
     data object Loading : HistoryUiState
@@ -66,8 +72,13 @@ class HistoryViewModel(
                             expenses.observeForPeriod(selected.id),
                             budget.observeIncome(selected.id),
                             expenses.categories,
-                        ) { periodExpenses, incomes, categories ->
-                            HistoryUiState.Ready(periods, selected, buildDays(selected, periodExpenses, incomes, categories, day))
+                            budget.config.filterNotNull(),
+                        ) { periodExpenses, incomes, categories, config ->
+                            HistoryUiState.Ready(
+                                periods,
+                                selected,
+                                buildDays(selected, periodExpenses, incomes, categories, day, config.setupDate ?: selected.startDate),
+                            )
                         }
                     }
                 }
@@ -80,12 +91,15 @@ class HistoryViewModel(
         incomes: List<IncomeEntity>,
         categories: List<CategoryEntity>,
         today: LocalDate,
+        countFrom: LocalDate,
     ): List<HistoryDay> {
         val zone = time.zone()
         val range = period.range()
         val budgetSnapshot = period.toBudget()
         val entries = periodExpenses.filter { it.affectsAllowance }.map { it.toEntry(zone) }
         val incomeEntries = incomes.map { it.toEntry(zone) }
+        val pocketByDay = PocketEngine.pocket(budgetSnapshot, entries, incomeEntries, today, countFrom)
+            .days.associate { it.day to it.deltaPaise }
         val byId = categories.associateBy { it.id }
         val rowsByDay = periodExpenses.groupBy { range.clamp(it.occurredAt.localDateIn(zone)) }
         val last = range.clamp(minOf(today, range.endInclusive))
@@ -95,6 +109,7 @@ class HistoryViewModel(
                 HistoryDay(
                     allowance = AllowanceEngine.dayAllowance(budgetSnapshot, entries, incomeEntries, day),
                     expenses = rowsByDay[day].orEmpty().map { ExpenseRow(it, it.categoryId?.let(byId::get)) },
+                    pocketDeltaPaise = pocketByDay[day],
                 )
             }
             .toList()

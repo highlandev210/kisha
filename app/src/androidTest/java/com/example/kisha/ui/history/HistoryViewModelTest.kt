@@ -60,6 +60,14 @@ class HistoryViewModelTest {
         }
     }
 
+    @Test fun finishedDaysShowWhatTheyAddedToThePocket() = runTest {
+        ready.test {
+            val days = awaitMatching { s -> s.days.sumOf { it.expenses.size } == 2 }.days
+            assertEquals(listOf(null, -18_966L, 30_000L), days.map { it.pocketDeltaPaise })
+            cancelAndIgnoreRemainingEvents()
+        }
+    }
+
     @Test fun previousPeriodBrowsable() = runTest {
         today.value = d(12, 2)
         ready.test {
