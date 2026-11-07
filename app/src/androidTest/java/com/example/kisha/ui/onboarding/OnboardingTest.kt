@@ -3,6 +3,7 @@ package com.example.kisha.ui.onboarding
 import androidx.annotation.StringRes
 import androidx.compose.ui.test.assertIsEnabled
 import androidx.compose.ui.test.assertIsNotEnabled
+import androidx.compose.ui.test.assertTextContains
 import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithTag
@@ -10,6 +11,7 @@ import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTextReplacement
+import androidx.test.espresso.Espresso
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
 import com.example.kisha.AppContainer
@@ -85,5 +87,16 @@ class OnboardingTest {
         compose.onNodeWithText(s(R.string.onboarding_next)).performClick()
 
         compose.onNodeWithTag(TestTags.PREVIEW_ALLOWANCE).assertTextEquals("-₹200")
+    }
+
+    @Test fun systemBackGoesToPreviousStep() {
+        compose.onNodeWithTag(TestTags.INCOME_FIELD).performTextInput("60000")
+        compose.onNodeWithText(s(R.string.onboarding_next)).performClick()
+        compose.onNodeWithText(s(R.string.cycle_calendar_month)).assertExists()
+
+        Espresso.closeSoftKeyboard()
+        Espresso.pressBack()
+
+        compose.onNodeWithTag(TestTags.INCOME_FIELD).assertTextContains("60000")
     }
 }

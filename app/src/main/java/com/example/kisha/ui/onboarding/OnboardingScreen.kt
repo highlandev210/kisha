@@ -1,5 +1,6 @@
 package com.example.kisha.ui.onboarding
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -55,6 +56,8 @@ fun OnboardingScreen(container: AppContainer) {
         OnboardingViewModel(container.budgetRepository, container.time, defaultCategories(context))
     }
     val state by viewModel.state.collectAsStateWithLifecycle()
+    // System back steps through setup instead of leaving the app and losing what was entered.
+    BackHandler(enabled = state.step > 0, onBack = viewModel::back)
 
     Scaffold(
         bottomBar = {
