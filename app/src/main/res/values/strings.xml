@@ -1,3 +1,52 @@
 <resources>
-    <string name="app_name">kisha</string>
+    <string name="app_name">Kisha</string>
+    <string name="loading">Loading</string>
+
+    <!-- Onboarding -->
+    <string name="onboarding_step">Step %1$d of %2$d</string>
+    <string name="onboarding_income_title">How much do you have for this period?</string>
+    <string name="onboarding_income_body">Your salary, or the total budget for one cycle. You can change it later.</string>
+    <string name="onboarding_income_label">Income or budget</string>
+    <string name="onboarding_cycle_title">When does your money come in?</string>
+    <string name="onboarding_cycle_body">Kisha resets your budget at the start of each cycle.</string>
+    <string name="cycle_calendar_month">Calendar month</string>
+    <string name="cycle_payday">Payday cycle</string>
+    <string name="cycle_day_of_month">Day of month</string>
+    <string name="cycle_last_working_day">Last working day</string>
+    <string name="cycle_day_label">Payday (1–31)</string>
+    <string name="onboarding_fixed_title">Money already spoken for</string>
+    <string name="onboarding_fixed_body">Rent, EMIs, subscriptions. Kisha sets these aside before working out your daily number.</string>
+    <string name="onboarding_preview_title">Here is your number</string>
+    <string name="onboarding_preview_label">You can spend today</string>
+    <plurals name="onboarding_preview_days">
+        <item quantity="one">for today, the last day of this period</item>
+        <item quantity="other">a day, across the next %1$d days</item>
+    </plurals>
+    <string name="onboarding_next">Next</string>
+    <string name="onboarding_skip">Skip</string>
+    <string name="onboarding_back">Back</string>
+    <string name="onboarding_start">Start using Kisha</string>
+
+    <!-- Fixed costs -->
+    <string name="fixed_name_label">Name</string>
+    <string name="fixed_amount_label">Amount</string>
+    <string name="fixed_due_day_label">Due day (optional)</string>
+    <string name="fixed_add">Add</string>
+    <string name="fixed_remove">Remove %1$s</string>
+    <string name="fixed_due_on">Due on day %1$d</string>
+
+    <!-- Default categories (CT-1) -->
+    <string name="category_food">Food</string>
+    <string name="category_transport">Transport</string>
+    <string name="category_groceries">Groceries</string>
+    <string name="category_shopping">Shopping</string>
+    <string name="category_bills">Bills</string>
+    <string name="category_health">Health</string>
+    <string name="category_entertainment">Entertainment</string>
+    <string name="category_other">Other</string>
+
+    <!-- Main navigation -->
+    <string name="tab_today">Today</string>
+    <string name="tab_history">History</string>
+    <string name="tab_settings">Settings</string>
 </resources>
