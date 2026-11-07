@@ -49,4 +49,24 @@
     <string name="tab_today">Today</string>
     <string name="tab_history">History</string>
     <string name="tab_settings">Settings</string>
+
+    <!-- Home -->
+    <string name="home_today_label">Left to spend today</string>
+    <string name="status_on_track">On track</string>
+    <string name="status_low">Running low</string>
+    <string name="status_over">Over by %1$s</string>
+    <string name="home_period_left">%1$s left this period</string>
+    <plurals name="home_days_left">
+        <item quantity="one">%1$d day left</item>
+        <item quantity="other">%1$d days left</item>
+    </plurals>
+    <string name="home_period_range">%1$s – %2$s</string>
+    <string name="home_period_progress">Period progress</string>
+    <string name="home_spent_today">Spent today</string>
+    <string name="home_no_expenses">Nothing spent yet today.</string>
+    <string name="expense_deleted">Expense deleted</string>
+    <string name="undo">Undo</string>
+    <string name="delete">Delete</string>
+    <string name="add">Add</string>
+    <string name="expense_no_category">No category</string>
 </resources>

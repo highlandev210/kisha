@@ -1,0 +1,48 @@
+package com.example.kisha.ui.home
+
+import androidx.compose.ui.test.assertTextEquals
+import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onNodeWithTag
+import androidx.compose.ui.test.onNodeWithText
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.platform.app.InstrumentationRegistry
+import com.example.kisha.AppContainer
+import com.example.kisha.R
+import com.example.kisha.testing.FixedTimeSource
+import com.example.kisha.testing.setUpWorkedExample
+import com.example.kisha.testing.testContainer
+import com.example.kisha.ui.KishaAppUi
+import com.example.kisha.ui.TestTags
+import com.example.kisha.ui.theme.KishaTheme
+import kotlinx.coroutines.runBlocking
+import org.junit.After
+import org.junit.Before
+import org.junit.Rule
+import org.junit.Test
+import org.junit.runner.RunWith
+import java.time.Instant
+
+@RunWith(AndroidJUnit4::class)
+class HomeScreenTest {
+    @get:Rule val compose = createComposeRule()
+    private val time = FixedTimeSource(Instant.parse("2026-11-01T04:30:00Z"))
+    private lateinit var container: AppContainer
+    private val res = InstrumentationRegistry.getInstrumentation().targetContext.resources
+
+    @Before fun setUp() {
+        container = testContainer(time)
+        runBlocking { container.setUpWorkedExample() }
+        compose.setContent { KishaTheme { KishaAppUi(container) } }
+        compose.waitUntil(5_000) { compose.onAllNodesWithTag(TestTags.ALLOWANCE).fetchSemanticsNodes().isNotEmpty() }
+    }
+
+    @After fun tearDown() = container.database.close()
+
+    @Test fun showsAllowanceAndPeriodSummary() {
+        compose.onNodeWithTag(TestTags.ALLOWANCE).assertTextEquals("₹800")
+        compose.onNodeWithText("₹24,000", substring = true).assertExists()
+        compose.onNodeWithText(res.getQuantityString(R.plurals.home_days_left, 30, 30)).assertExists()
+        compose.onNodeWithText(res.getString(R.string.status_on_track)).assertExists()
+    }
+}
