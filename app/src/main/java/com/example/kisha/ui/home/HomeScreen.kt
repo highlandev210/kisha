@@ -16,9 +16,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Error
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LinearWavyProgressIndicator
@@ -38,7 +35,6 @@ import androidx.compose.runtime.key
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
@@ -50,13 +46,14 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.example.kisha.R
-import com.example.kisha.allowance.AllowanceStatus
 import com.example.kisha.allowance.DateRange
 import com.example.kisha.allowance.DayAllowance
 import com.example.kisha.data.db.ExpenseEntity
 import com.example.kisha.ui.TestTags
 import com.example.kisha.ui.common.ExpenseListItem
 import com.example.kisha.ui.common.ExpenseRow
+import com.example.kisha.ui.common.StatusLabel
+import com.example.kisha.ui.common.statusColor
 import com.example.kisha.ui.format.LocalMoneyFormatter
 import kotlinx.coroutines.launch
 import java.time.format.DateTimeFormatter
@@ -99,13 +96,6 @@ fun HomeScreen(viewModel: HomeViewModel, onExpenseClick: (Long) -> Unit, snackba
     }
 }
 
-@Composable
-private fun statusColor(status: AllowanceStatus): Color = when (status) {
-    AllowanceStatus.ON_TRACK -> MaterialTheme.colorScheme.primary
-    AllowanceStatus.LOW -> MaterialTheme.colorScheme.tertiary
-    AllowanceStatus.OVER -> MaterialTheme.colorScheme.error
-}
-
 /** HM-1/HM-2, UI-3, DP-7: the dominant number, coloured by state, sprung into place on change. */
 @Composable
 private fun AllowanceHero(allowance: DayAllowance) {
@@ -134,23 +124,7 @@ private fun AllowanceHero(allowance: DayAllowance) {
                 modifier = Modifier.testTag(TestTags.ALLOWANCE),
             )
         }
-        StatusLabel(allowance, color)
-    }
-}
-
-/** DP-6: state is always an icon plus words, never colour alone. */
-@Composable
-private fun StatusLabel(allowance: DayAllowance, color: Color) {
-    val formatter = LocalMoneyFormatter.current
-    val (icon, label) = when (allowance.status) {
-        AllowanceStatus.ON_TRACK -> Icons.Filled.CheckCircle to stringResource(R.string.status_on_track)
-        AllowanceStatus.LOW -> Icons.Filled.Warning to stringResource(R.string.status_low)
-        AllowanceStatus.OVER ->
-            Icons.Filled.Error to stringResource(R.string.status_over, formatter.format(-allowance.remainingPaise))
-    }
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(6.dp)) {
-        Icon(icon, contentDescription = null, tint = color)
-        Text(label, style = MaterialTheme.typography.titleMediumEmphasized, color = color)
+        StatusLabel(allowance, MaterialTheme.typography.titleMediumEmphasized)
     }
 }
 

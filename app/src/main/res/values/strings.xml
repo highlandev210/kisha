@@ -82,4 +82,9 @@
     <string name="keypad_dot">Decimal point</string>
     <string name="dialog_ok">OK</string>
     <string name="dialog_cancel">Cancel</string>
+
+    <!-- History -->
+    <string name="history_spent_of">%1$s of %2$s</string>
+    <string name="history_previous">Previous period</string>
+    <string name="history_next">Next period</string>
 </resources>

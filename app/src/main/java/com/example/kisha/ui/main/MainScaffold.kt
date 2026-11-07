@@ -37,6 +37,8 @@ import com.example.kisha.R
 import com.example.kisha.ui.entry.EntryTarget
 import com.example.kisha.ui.entry.EntryViewModel
 import com.example.kisha.ui.entry.QuickEntrySheet
+import com.example.kisha.ui.history.HistoryScreen
+import com.example.kisha.ui.history.HistoryViewModel
 import com.example.kisha.ui.home.HomeScreen
 import com.example.kisha.ui.home.HomeViewModel
 
@@ -54,6 +56,9 @@ fun MainScaffold(container: AppContainer) {
     val wide = LocalConfiguration.current.screenWidthDp >= 600
     val homeViewModel = viewModel {
         HomeViewModel(container.budgetRepository, container.expenseRepository, container.today, container.time)
+    }
+    val historyViewModel = viewModel {
+        HistoryViewModel(container.budgetRepository, container.expenseRepository, container.today, container.time)
     }
     val entryViewModel = viewModel {
         EntryViewModel(container.expenseRepository, container.budgetRepository, container.time)
@@ -108,7 +113,7 @@ fun MainScaffold(container: AppContainer) {
             Box(Modifier.padding(padding)) {
                 when (tab) {
                     Tab.TODAY -> HomeScreen(homeViewModel, onExpenseClick = openExpense, snackbarHostState = snackbarHostState)
-                    Tab.HISTORY -> Text(stringResource(R.string.tab_history))
+                    Tab.HISTORY -> HistoryScreen(historyViewModel, onExpenseClick = openExpense)
                     Tab.SETTINGS -> Text(stringResource(R.string.tab_settings))
                 }
             }
