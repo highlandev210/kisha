@@ -41,6 +41,7 @@ class SettingsViewModelTest {
         assertTrue(vm.addFixedCost("Gym", "3000", ""))
         container.budgetRepository.periods.test {
             awaitMatching { it.single().fixedTotal == 3_900_000L }
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -55,6 +56,7 @@ class SettingsViewModelTest {
         assertTrue(vm.setBaseIncome("66000"))
         container.budgetRepository.periods.test {
             awaitMatching { it.single().income == 6_600_000L }
+            cancelAndIgnoreRemainingEvents()
         }
     }
 

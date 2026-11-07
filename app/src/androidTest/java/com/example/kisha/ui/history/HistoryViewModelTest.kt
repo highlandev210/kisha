@@ -56,6 +56,7 @@ class HistoryViewModelTest {
             assertEquals(-18_966L, nov2.remainingPaise)
             assertEquals(AllowanceStatus.OVER, nov2.status)
             assertEquals(80_357L, nov3.basePaise)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -68,6 +69,7 @@ class HistoryViewModelTest {
             assertEquals(30, nov.days.size)
             assertEquals(d(11, 30), nov.days.first().allowance.day)
             assertEquals(d(11, 1), nov.days.last().allowance.day)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }

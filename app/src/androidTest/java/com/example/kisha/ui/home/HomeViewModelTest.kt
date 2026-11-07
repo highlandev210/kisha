@@ -43,6 +43,7 @@ class HomeViewModelTest {
             awaitMatching { it.allowance.remainingPaise == 30_000L }
             today.value = LocalDate.of(2026, 11, 2)
             assertEquals(81_034L, awaitMatching { it.allowance.day == LocalDate.of(2026, 11, 2) }.allowance.basePaise)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -52,6 +53,7 @@ class HomeViewModelTest {
             today.value = LocalDate.of(2026, 12, 1)
             val dec = awaitMatching { it.period.start == LocalDate.of(2026, 12, 1) }
             assertEquals(LocalDate.of(2026, 12, 31), dec.period.endInclusive)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 
@@ -63,6 +65,7 @@ class HomeViewModelTest {
             awaitMatching { it.todayExpenses.isEmpty() }
             vm.undoDelete()
             assertEquals("lunch", awaitMatching { it.todayExpenses.size == 1 }.todayExpenses.single().expense.note)
+            cancelAndIgnoreRemainingEvents()
         }
     }
 }
